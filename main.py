@@ -1,0 +1,133 @@
+# DONE apart from exception handling
+import pickle
+from datetime import date
+from typing import Literal
+
+
+# To prompt user to select an option and execute it
+def show_options():
+    print("""Hello User! Select one of the numbers below to execute the corresponding option: 
+
+1. Enter expense(s)
+2. Display all expenses
+3. Filter expenses by date
+4. Filter expenses by category
+5. Show expense report for a month
+6. Exit""")
+
+# to filter by either date or category. add parameter while using it in show options
+def filter_by_parameter(parameter: Literal["date", "category"]):
+    
+    with open("expenses.dat", 'rb') as f:
+        total_expense_for_parameter = 0
+        if parameter == "date":
+            i = 3
+            req_parameter = input("Enter the date for which expenditure is required in DD-MM-YYYY format: ")
+        elif parameter == "category":
+            i = 0
+            display_categories()
+            category = input("Enter the required category for displaying expenses: ")
+            req_parameter = category.capitalize()
+
+        while True:
+            try:
+                data = pickle.load(f)
+                if data[i] == req_parameter:
+                    total_expense_for_parameter += data[1]
+                    print(f"{data}")
+            except EOFError:
+                break
+    print(f"The total expense for the {parameter} {req_parameter} is {total_expense_for_parameter}")
+    print()
+
+# not for the user but req in the program as it might be repititve
+def display_categories():
+    print(''' The expenditure categories are: 
+1. Food
+2. Transport
+3. Shopping
+4. Entertainment
+5. Bills
+6. Health
+7. Education
+8. Groceries
+9. Rent
+10. Travel
+11. Savings
+12. Gifts
+13. Subscriptions
+14. Personal Care
+15. Miscellaneous''')
+
+# To prompt the user to enter an expenditure amount, the category of the expense and any remarks for that expense and store the expense by category
+def ask_expense():
+    more = 'y'
+    while more.lower() == 'y':
+        amount = int(input("Enter amount spent: "))
+        display_categories()
+        category = input("Enter the category of the expense from the above options: ").capitalize()
+        remarks = input("Enter remarks for this expenditure: ")
+        current_date = date.today().strftime("%d-%m-%Y")
+        data = [category.capitalize(), amount, remarks, current_date]
+
+        with open("expenses.dat", "ab") as f:
+            pickle.dump(data, f)
+        print("Expense recorded succeefully")
+
+        more = input("Add more expenses? [y/n]")
+    print()
+
+# shows the total monthly expense along with the total expense for each category in the month
+def show_monthly_expense_report():
+    month = input("Enter the month and year in MM-YYYY format to get the expense report for the month: ")
+    with open("expenses.dat", 'rb') as f:
+        total_expense_for_month = 0
+        category_total = {"Food":0,"Transport":0,"Shopping":0,"Entertainment":0,"Bills":0,"Health":0,"Education":0,"Groceries":0,"Rent":0,"Travel":0,"Savings":0,"Gifts":0,"Subscriptions":0,"Personal Care":0,"Miscellaneous":0}
+
+        while True:
+            try:
+                data = pickle.load(f)
+                if data[3].endswith(month):
+                    total_expense_for_month += data[1]
+                    category_total[data[0]] += data[1]
+            except EOFError:
+                break
+    
+    print(f"The total expenditure of the month is Rs. {total_expense_for_month} ")
+    print(category_total)
+    print()
+
+# displays all the recorded expenses and the total of the expenses
+def show_all_expenses():
+    with open("expenses.dat", 'rb') as f:
+        while True:
+            try:
+                data = pickle.load(f)
+                print(data)
+            except EOFError:
+                break
+    print()
+
+if __name__ == "__main__":
+    while True:
+        show_options()
+        selected_option = int(input("Enter the option: "))
+        print()
+
+        if selected_option == 1:
+            ask_expense()
+
+        elif selected_option == 2:
+            show_all_expenses()
+
+        elif selected_option == 3:
+            filter_by_parameter("date")
+
+        elif selected_option == 4:
+            filter_by_parameter("category")
+
+        elif selected_option == 5:
+            show_monthly_expense_report()
+
+        elif selected_option == 6:
+            break
