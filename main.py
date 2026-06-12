@@ -2,7 +2,14 @@
 import pickle
 from datetime import date
 from typing import Literal
+from pathlib import Path
 
+# make directory to store app data
+APP_DIR = Path.home() / "ExpenseTracker"
+DATA_DIR = APP_DIR / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+EXPENSE_FILE = DATA_DIR / "expenses.dat"
 
 # To prompt user to select an option and execute it
 def show_options():
@@ -18,7 +25,7 @@ def show_options():
 # to filter by either date or category. add parameter while using it in show options
 def filter_by_parameter(parameter: Literal["date", "category"]):
     
-    with open("expenses.dat", 'rb') as f:
+    with open(EXPENSE_FILE, 'rb') as f:
         total_expense_for_parameter = 0
         if parameter == "date":
             i = 3
@@ -70,7 +77,7 @@ def ask_expense():
         current_date = date.today().strftime("%d-%m-%Y")
         data = [category.capitalize(), amount, remarks, current_date]
 
-        with open("expenses.dat", "ab") as f:
+        with open(EXPENSE_FILE, "ab") as f:
             pickle.dump(data, f)
         print("Expense recorded succeefully")
 
@@ -80,7 +87,7 @@ def ask_expense():
 # shows the total monthly expense along with the total expense for each category in the month
 def show_monthly_expense_report():
     month = input("Enter the month and year in MM-YYYY format to get the expense report for the month: ")
-    with open("expenses.dat", 'rb') as f:
+    with open(EXPENSE_FILE, 'rb') as f:
         total_expense_for_month = 0
         category_total = {"Food":0,"Transport":0,"Shopping":0,"Entertainment":0,"Bills":0,"Health":0,"Education":0,"Groceries":0,"Rent":0,"Travel":0,"Savings":0,"Gifts":0,"Subscriptions":0,"Personal Care":0,"Miscellaneous":0}
 
@@ -99,7 +106,7 @@ def show_monthly_expense_report():
 
 # displays all the recorded expenses and the total of the expenses
 def show_all_expenses():
-    with open("expenses.dat", 'rb') as f:
+    with open(EXPENSE_FILE, 'rb') as f:
         while True:
             try:
                 data = pickle.load(f)
